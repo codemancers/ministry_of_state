@@ -15,8 +15,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "ministry_of_state"
   gem.homepage = "http://github.com/gnufied/ministry_of_state"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Handling state machines}
+  gem.description = %Q{A ActiveRecord plugin for working with state machines}
   gem.email = "hkumar@crri.co.in"
   gem.authors = ["Hemant Kumar"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
