@@ -1,3 +1,5 @@
+.idea/
+.rvmrc
 # rcov generated
 coverage
 
@@ -41,3 +43,4 @@ pkg
 # For vim:
 #*.swp
 vendor
+
