@@ -17,8 +17,8 @@ module MinistryOfState
 
       self.initial_state = opts[:initial_state]
       self.state_column  = opts[:state_column] || 'status'
-      self.states        = {}
-      self.events        = {}
+      self.states        = HashWithIndifferentAccess.new
+      self.events        = HashWithIndifferentAccess.new
 
       add_state(self.initial_state)
       self.send(:include, MinistryOfState::InstanceMethods)
@@ -49,15 +49,23 @@ module MinistryOfState
   module InstanceMethods
 
     def set_initial_state
+      begin
+        enter   = self.class.states[self.class.initial_state][:enter]
+        transaction do
+          call(enter) if enter
+        end
+        true
+      rescue StandardError => e
+        errors.add(:base, e.to_s)
+        false
+      end
       write_attribute self.class.state_column, self.class.initial_state
     end
 
     def run_initial_state_actions
       begin
-        enter   = self.class.states[self.class.initial_state][:enter]
         after   = self.class.states[self.class.initial_state][:after]
         transaction do
-          call(enter) if enter
           call(after) if after
         end
         true
@@ -80,16 +88,17 @@ module MinistryOfState
       return unless check_guard
       begin
         transaction do
-          enter = states[to_state.to_sym][:enter]
-          after = states[to_state.to_sym][:after]
-          exit  = states[to_state.to_sym][:exit]
+          enter = states[to_state][:enter]
+          after = states[to_state][:after]
+          exit  = states[to_state][:exit]
+
           call(enter) if enter
           current_state = send(self.class.state_column)
           check_transitions?(current_state, options)
-          self.class.state_column = to_state.to_s
+          attributes[self.class.state_column] = to_state.to_s
           save!
-          call(after) if after
           call(exit) if exit
+          call(after) if after
         end
         true
       rescue StandardError => e
@@ -99,7 +108,7 @@ module MinistryOfState
     end
 
     def check_transitions?(current_state, opts)
-      raise 'do not allowed from this state' unless opts[:from].include?(current_state)
+      raise "event not allowed from '#{current_state}' state" unless opts[:from].include?(current_state)
     end
 
     def call(callback)
