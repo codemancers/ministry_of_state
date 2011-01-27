@@ -4,6 +4,12 @@ module MinistryOfState
     base.extend MinistryOfState::ClassMethods
   end
 
+  class InvalidState < Exception; end
+
+  class NoInitialState < Exception; end
+
+  class TransitionNotAllowed < Exception; end
+
   module ClassMethods
 
     def ministry_of_state(opts={})
@@ -13,7 +19,7 @@ module MinistryOfState
       class_attribute :initial_state
       class_attribute :state_column
 
-      raise 'should define initial state' unless opts[:initial_state]
+      raise NoInitialState unless opts[:initial_state]
 
       self.initial_state = opts[:initial_state]
       self.state_column  = opts[:state_column] || 'status'
@@ -39,7 +45,7 @@ module MinistryOfState
     end
 
     def transitions(opts={})
-      raise 'specify from and to options' if opts[:from].blank? || opts[:to].blank?
+      raise TransitionNotAllowed if opts[:from].blank? || opts[:to].blank?
       opts[:from] = [opts[:from]] unless opts[:from].is_a?(Array)
       {:from => opts[:from], :to => opts[:to], :guard => opts[:guard]}
     end
@@ -108,7 +114,7 @@ module MinistryOfState
     end
 
     def check_transitions?(current_state, opts)
-      raise "event not allowed from '#{current_state}' state" unless opts[:from].include?(current_state)
+      raise InvalidState unless opts[:from].include?(current_state)
     end
 
     def call(callback)
