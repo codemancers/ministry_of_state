@@ -6,9 +6,6 @@ require File.dirname(__FILE__) + "/ministry_of_state"
 
 module MinistryOfState
   class Ralitie < Rails::Railtie
-    config.after_initialize do
-
-    end
   end
   # instance methods
 end
