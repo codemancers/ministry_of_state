@@ -33,8 +33,9 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @blog.pending?
     end
     should "be able to change state" do
+      assert_nil @blog.foo
       assert @blog.approve!
-      p @blog.reload
+      assert @blog.foo
       assert @blog.reload.approved?
     end
   end

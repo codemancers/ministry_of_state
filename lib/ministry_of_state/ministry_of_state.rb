@@ -11,7 +11,6 @@ module MinistryOfState
   
   module ClassMethods
     def ministry_of_state(opts = {})
-      puts "Calling ministry of state"
       class_attribute :states
       class_attribute :events
 
@@ -82,7 +81,6 @@ module MinistryOfState
     end
 
     def check_state(state)
-      puts "State is #{state} and db #{send(state_machine_column)}"
       send(state_machine_column) == state.to_s
     end
 
@@ -102,7 +100,7 @@ module MinistryOfState
           self.lock!
           current_state = send(state_machine_column)
           check_transitions?(current_state, options)
-          attributes[state_machine_column] = to_state.to_s
+          write_attribute(state_machine_column,to_state.to_s)
           save!
           invoke_callback(exit) if exit
           invoke_callback(after) if after
