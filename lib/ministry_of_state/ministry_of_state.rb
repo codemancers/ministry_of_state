@@ -1,14 +1,17 @@
 module MinistryOfState
   extend ActiveSupport::Concern
 
+
   class InvalidState < Exception; end
 
   class NoInitialState < Exception; end
 
   class TransitionNotAllowed < Exception; end
-
+  class InvalidStateColumn < Exception; end
+  
   module ClassMethods
     def ministry_of_state(opts = {})
+      puts "Calling ministry of state"
       class_attribute :states
       class_attribute :events
 
@@ -30,7 +33,7 @@ module MinistryOfState
     def add_state(name, options={})
       self.states.merge!(name => options)
       class_eval <<-RUBY,__FILE__,__LINE__+1
-        def #{name}?; check_state(#{name}); end
+        def #{name}?; check_state('#{name}'); end
       RUBY
     end
 
@@ -39,7 +42,7 @@ module MinistryOfState
       self.events.merge!(name => opts)
       class_eval <<-RUBY,__FILE__,__LINE__+1
         def #{name.to_s}!
-          fire(#{name})
+          fire('#{name}')
         end
       RUBY
     end
@@ -54,6 +57,7 @@ module MinistryOfState
   end
 
   module InstanceMethods
+    
     def set_initial_state
       begin
         enter   = states[initial_state][:enter]
@@ -63,7 +67,7 @@ module MinistryOfState
         errors.add(:base, e.to_s)
         false
       end
-      write_attribute state_column, initial_state
+      write_attribute state_machine_column, initial_state
     end
 
     def run_initial_state_actions
@@ -78,7 +82,8 @@ module MinistryOfState
     end
 
     def check_state(state)
-      send(state_column) == state.to_s
+      puts "State is #{state} and db #{send(state_machine_column)}"
+      send(state_machine_column) == state.to_s
     end
 
     def fire(event)
@@ -95,9 +100,9 @@ module MinistryOfState
 
           invoke_callback(enter) if enter
           self.lock!
-          current_state = send(state_column)
+          current_state = send(state_machine_column)
           check_transitions?(current_state, options)
-          attributes[state_column] = to_state.to_s
+          attributes[state_machine_column] = to_state.to_s
           save!
           invoke_callback(exit) if exit
           invoke_callback(after) if after
@@ -109,6 +114,14 @@ module MinistryOfState
       end
     end
 
+    def state_machine_column
+      if(self.class.column_names.include?(state_column))
+        state_column
+      else
+        raise InvalidStateColumn.new("State column '#{state_column}' does not exist in table '#{self.class.table_name}'")
+      end
+    end
+    
     def check_transitions?(current_state, opts)
       raise InvalidState.new("Already in #{current_state}") unless opts[:from].include?(current_state)
     end

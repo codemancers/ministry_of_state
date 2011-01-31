@@ -14,5 +14,3 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'ministry_of_state'
 
-class Test::Unit::TestCase
-end

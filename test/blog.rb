@@ -1,11 +1,11 @@
-class MinistryOfState::Blog < ActiveRecord::Base
+class Blog < ActiveRecord::Base
 
-   ministry_of_state(:initial_state => 'pending', :state_column => 'aa' )
+   ministry_of_state(:initial_state => 'pending', :state_column => 'status' )
 
    add_state :approved, :enter => :test_method
 
-   add_event :set_approved do
-     transitions :from => 'pending', :to => 'approved', :guard => proc{ | o |  o }
+   add_event :approve do
+     transitions :from => 'pending', :to => 'approved'
    end
 
   def test_method
