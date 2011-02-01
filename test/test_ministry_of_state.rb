@@ -101,12 +101,30 @@ class TestMinistryOfState < ActiveSupport::TestCase
     end
   end
 
-  context "Not specifying from and to should throw error" do
-    
+  context "Not specifying from and to " do
+    should "throw error" do
+      assert_raise(MinistryOfState::TransitionNotAllowed) do
+        class Foo < ActiveRecord::Base
+          include MinistryOfState
+          ministry_of_state(:state_column => 'status',:initial_state => :pending)
+          add_state :active
+          add_event(:activate) do
+            transitions(:to => :active)
+          end
+        end
+      end
+    end
   end
 
-  context "Not specifying initial state should throw error" do
-    
+  context "Not specifying initial state" do
+    should "throw error" do
+      assert_raise(MinistryOfState::NoInitialState) do
+        class Note < ActiveRecord::Base
+          include MinistryOfState
+          ministry_of_state(:state_column => 'status' )
+        end
+      end
+    end
   end
 
   context "calling enter and exit callbacks for normal events" do
