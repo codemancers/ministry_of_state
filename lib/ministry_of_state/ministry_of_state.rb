@@ -50,7 +50,7 @@ module MinistryOfState
       if opts[:from].blank? || opts[:to].blank?
         raise TransitionNotAllowed.new("You need to specify from and to states")
       end
-      opts[:from] = Array(opts[:from])
+      opts[:from] = Array(opts[:from]).map(&:to_sym)
       {:from => opts[:from], :to => opts[:to], :guard => opts[:guard] }
     end
   end
@@ -81,7 +81,7 @@ module MinistryOfState
     end
 
     def check_state(state)
-      send(state_machine_column) == state.to_s
+      send("#{state_machine_column}_was") == state.to_s
     end
 
     def fire(event)
@@ -98,14 +98,14 @@ module MinistryOfState
 
           invoke_callback(enter) if enter
           self.lock!
-          current_state = send(state_machine_column)
+          current_state = send(state_machine_column).try(:to_sym)
           check_transitions?(current_state, options)
           write_attribute(state_machine_column,to_state.to_s)
-          save!
+          save
           invoke_callback(exit) if exit
           invoke_callback(after) if after
         end
-        true
+        self.errors.empty?
       rescue StandardError => e
         errors.add(:base, e.to_s)
         false
@@ -121,7 +121,9 @@ module MinistryOfState
     end
     
     def check_transitions?(current_state, opts)
-      raise InvalidState.new("Already in #{current_state}") unless opts[:from].include?(current_state)
+      unless opts[:from].include?(current_state)
+        raise InvalidState.new("Invalid from state '#{current_state}' for target state '#{opts[:to]}'")
+      end
     end
 
     def invoke_callback(callback)

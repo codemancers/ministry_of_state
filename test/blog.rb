@@ -1,4 +1,5 @@
 class Blog < ActiveRecord::Base
+  validates_presence_of :text
 
    ministry_of_state(:initial_state => 'pending', :state_column => 'status' )
    attr_accessor :foo
