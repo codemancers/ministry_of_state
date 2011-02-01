@@ -32,6 +32,7 @@ class TestMinistryOfState < ActiveSupport::TestCase
       u.string :gender
       u.datetime :login_at
       u.string :login
+      u.string :type
     end
     Article.connection.drop_table('articles') if Article.connection.table_exists?(:articles)
     Article.connection.create_table :articles do |a|
@@ -113,8 +114,19 @@ class TestMinistryOfState < ActiveSupport::TestCase
   end
 
   context "for STI classes child" do
-    should "inherit all the parent states and events" do
+    setup do
+      @student = Student.create(:firstname => "Hemant", :lastname => "kumar")
+    end
 
+    should "inherit all the parent states and events" do
+      assert @student.pending?
+
+      assert @student.activate!
+      assert @student.active?
+
+
+      assert @student.pending_payment!
+      assert @student.pending_payment?
     end
 
     should "be able to override events" do
