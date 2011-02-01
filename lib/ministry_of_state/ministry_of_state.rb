@@ -85,9 +85,9 @@ module MinistryOfState
     end
 
     def fire(event)
-      states      = self.class.states
       options     = events[event]
       to_state    = options[:to]
+      raise TransitionNotAllowed.new("Invalid 'to' state '#{to_state}'") unless states[to_state]
       check_guard = options[:guard] ? invoke_callback(options[:guard]) : true
       return unless check_guard
       begin
@@ -130,6 +130,4 @@ module MinistryOfState
       callback.is_a?(Proc) ? callback.call(self) : send(callback)
     end
   end
-
-
 end

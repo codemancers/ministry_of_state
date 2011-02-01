@@ -2,6 +2,7 @@ require File.dirname(__FILE__) + '/helper'
 require File.dirname(__FILE__) + '/blog'
 require File.dirname(__FILE__) + '/user'
 require File.dirname(__FILE__) + '/article'
+require File.dirname(__FILE__) + '/student'
 
 ActiveRecord::Base.configurations = {
   'db1' => {
@@ -83,6 +84,12 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert !@user.pending_payment!
       assert !@user.errors.blank?
     end
+
+    should "throw error for non-existant to state" do
+      assert_raise(MinistryOfState::TransitionNotAllowed) do
+        @user.foobar!
+      end
+    end
   end
 
   context "For non-existant state columns" do
@@ -93,4 +100,29 @@ class TestMinistryOfState < ActiveSupport::TestCase
     end
   end
 
+  context "Not specifying from and to should throw error" do
+    
+  end
+
+  context "Not specifying initial state should throw error" do
+    
+  end
+
+  context "calling enter and exit callbacks for normal events" do
+    
+  end
+
+  context "for STI classes child" do
+    should "inherit all the parent states and events" do
+
+    end
+
+    should "be able to override events" do
+
+    end
+
+    should "be able to add their states" do
+
+    end
+  end
 end
