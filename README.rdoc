@@ -6,7 +6,20 @@ Because State machines are simple, they do not have to be greater than 2000 line
 * Events are wrapped in a transaction and record is locked before going for a state change.
 * Ignores dirty attributes (still on the fence with this one)
 * Events and states can be inhereted across classes.
-* Simple 131 lines of code, covered with 
+* Simple 136 lines of code, covered with close to > 98% test coverage.
+
+= Using it
+
+    class User < ActiveRecord::Base
+      include MinistryOfState
+      ministry_of_state(:initial_state => 'pending', :state_column => 'status' )
+      add_state :active
+      add_state :pending_payment
+
+      add_event(:activate) do
+        transitions(:from => :pending, :to => :active)
+      end
+    end
 
 == Contributing to ministry_of_state
  
@@ -20,6 +33,7 @@ Because State machines are simple, they do not have to be greater than 2000 line
 
 == Copyright
 
-Copyright (c) 2011 Hemant Kumar. See LICENSE.txt for
+Copyright (c) 2011 Hemant, Neeraj and Vishnu. See LICENSE.txt for
 further details.
+
 
