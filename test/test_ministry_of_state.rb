@@ -124,17 +124,21 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @student.activate!
       assert @student.active?
 
-
+      @student.gender = 'male'
+      @student.save
       assert @student.pending_payment!
       assert @student.pending_payment?
     end
 
     should "be able to override events" do
+      @student.gender = 'male'
+      @student.save
+      assert @student.make_foo!
+      assert @student.foo?
 
+      assert @student.activate!
+      assert @student.active?
     end
 
-    should "be able to add their states" do
-
-    end
   end
 end

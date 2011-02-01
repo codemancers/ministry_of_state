@@ -6,6 +6,6 @@ class Student < User
   end
 
   add_event(:make_foo) do
-    transitions(:from => :active, :to => :foo)
+    transitions(:from => [:pending,:active], :to => :foo)
   end
 end
