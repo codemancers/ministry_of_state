@@ -1,6 +1,12 @@
 = ministry_of_state
 
-Description goes here.
+Because State machines are simple, they do not have to be greater than 2000 lines of code (and complexity).
+
+= Features
+* Events are wrapped in a transaction and record is locked before going for a state change.
+* Ignores dirty attributes (still on the fence with this one)
+* Events and states can be inhereted across classes.
+* Simple 131 lines of code, covered with 
 
 == Contributing to ministry_of_state
  
