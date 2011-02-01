@@ -78,6 +78,10 @@ module MinistryOfState
       end
     end
 
+    def current_state
+      send("#{state_machine_column}_was").to_sym
+    end
+
     def check_state(state)
       send("#{state_machine_column}_was") == state.to_s
     end
@@ -96,8 +100,8 @@ module MinistryOfState
 
           invoke_callback(enter) if enter
           self.lock!
-          current_state = send(state_machine_column).try(:to_sym)
-          check_transitions?(current_state, options)
+          t_current_state = send(state_machine_column).try(:to_sym)
+          check_transitions?(t_current_state, options)
           write_attribute(state_machine_column,to_state.to_s)
           save
           invoke_callback(exit) if exit
@@ -118,9 +122,9 @@ module MinistryOfState
       end
     end
     
-    def check_transitions?(current_state, opts)
-      unless opts[:from].include?(current_state)
-        raise InvalidState.new("Invalid from state '#{current_state}' for target state '#{opts[:to]}'")
+    def check_transitions?(t_current_state, opts)
+      unless opts[:from].include?(t_current_state)
+        raise InvalidState.new("Invalid from state '#{t_current_state}' for target state '#{opts[:to]}'")
       end
     end
 

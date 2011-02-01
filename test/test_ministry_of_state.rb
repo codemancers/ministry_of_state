@@ -145,8 +145,10 @@ class TestMinistryOfState < ActiveSupport::TestCase
     should "call proper callbacks" do
       assert @post.pending?
       assert_nil @post.public
+
       assert @post.publish!
       assert @post.published?
+      assert_equal :published, @post.current_state
       assert @post.public
 
       assert_nil @post.private
