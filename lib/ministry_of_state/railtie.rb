@@ -11,6 +11,3 @@ module MinistryOfState
   # instance methods
 end
 
-ActiveRecord::Base.send(:include, ActiveSupport::Memoizable)
-ActiveRecord::Base.send(:include, MinistryOfState)
-

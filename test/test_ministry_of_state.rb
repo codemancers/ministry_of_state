@@ -1,6 +1,7 @@
 require File.dirname(__FILE__) + '/helper'
 require File.dirname(__FILE__) + '/blog'
 require File.dirname(__FILE__) + '/user'
+require File.dirname(__FILE__) + '/article'
 
 ActiveRecord::Base.configurations = {
   'db1' => {
@@ -30,6 +31,12 @@ class TestMinistryOfState < ActiveSupport::TestCase
       u.string :gender
       u.datetime :login_at
       u.string :login
+    end
+    Article.connection.drop_table('articles') if Article.connection.table_exists?(:articles)
+    Article.connection.create_table :articles do |a|
+      a.string :state
+      a.string :title
+      a.text :content
     end
   end
 
@@ -75,6 +82,14 @@ class TestMinistryOfState < ActiveSupport::TestCase
       @user.activate!
       assert !@user.pending_payment!
       assert !@user.errors.blank?
+    end
+  end
+
+  context "For non-existant state columns" do
+    should "throw error if state column is invalid" do
+      assert_raise(MinistryOfState::InvalidStateColumn) do
+        @article = Article.create
+      end
     end
   end
 

@@ -1,4 +1,5 @@
 class User < ActiveRecord::Base
+  include MinistryOfState
   validates_presence_of :gender, :on => :update, :if => :allow_gender_validation
   validates_presence_of :firstname, :lastname
 
