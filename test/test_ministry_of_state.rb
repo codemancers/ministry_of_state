@@ -3,6 +3,7 @@ require File.dirname(__FILE__) + '/blog'
 require File.dirname(__FILE__) + '/user'
 require File.dirname(__FILE__) + '/article'
 require File.dirname(__FILE__) + '/student'
+require File.dirname(__FILE__) + '/post'
 
 ActiveRecord::Base.configurations = {
   'db1' => {
@@ -24,6 +25,7 @@ class TestMinistryOfState < ActiveSupport::TestCase
       t.column :status, :string
       t.timestamps
     end
+    
     User.connection.drop_table('users') if User.connection.table_exists?(:users)
     User.connection.create_table :users do |u|
       u.string :status
@@ -34,11 +36,20 @@ class TestMinistryOfState < ActiveSupport::TestCase
       u.string :login
       u.string :type
     end
+
     Article.connection.drop_table('articles') if Article.connection.table_exists?(:articles)
     Article.connection.create_table :articles do |a|
       a.string :state
       a.string :title
       a.text :content
+    end
+
+    Post.connection.drop_table('posts') if Post.connection.table_exists?(:posts)
+    Post.connection.create_table :posts do |p|
+      p.string :status
+      p.string :title
+      p.text :content
+      p.timestamps
     end
   end
 
@@ -128,7 +139,21 @@ class TestMinistryOfState < ActiveSupport::TestCase
   end
 
   context "calling enter and exit callbacks for normal events" do
-    
+    setup do
+      @post = Post.create(:title => "Hello", :content => "Good world")
+    end
+    should "call proper callbacks" do
+      assert @post.pending?
+      assert_nil @post.public
+      assert @post.publish!
+      assert @post.published?
+      assert @post.public
+
+      assert_nil @post.private
+      assert @post.archive!
+      assert @post.archived?
+      assert @post.private
+    end
   end
 
   context "for STI classes child" do

@@ -3,9 +3,7 @@ module MinistryOfState
 
 
   class InvalidState < Exception; end
-
   class NoInitialState < Exception; end
-
   class TransitionNotAllowed < Exception; end
   class InvalidStateColumn < Exception; end
   
