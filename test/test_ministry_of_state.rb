@@ -7,8 +7,7 @@ require File.dirname(__FILE__) + '/post'
 
 ActiveRecord::Base.configurations = {
   'db1' => {
-    :adapter  => 'mysql2',
-    :username => 'root',
+    :adapter  => 'sqlite3',
     :encoding => 'utf8',
     :database => 'ministry_of_state_test',
   }
