@@ -1,34 +1,69 @@
 module MinistryOfState
   extend ActiveSupport::Concern
 
-
   class InvalidState < Exception; end
   class NoInitialState < Exception; end
   class TransitionNotAllowed < Exception; end
   class InvalidStateColumn < Exception; end
-  
+
   module ClassMethods
-    def ministry_of_state(opts = {})
-      class_attribute :states
-      class_attribute :events
+    class MosState
+      def initialize(name, column, opts)
+        @name, @column, @opts = name, column, opts
+      end
 
-      class_attribute :initial_state
-      class_attribute :state_column
+      attr_reader :name, :column, :opts
 
-      raise NoInitialState.new("You need to specify initial state") unless opts[:initial_state]
+      def initial?
+        opts[:initial]
+      end
+    end
 
-      self.initial_state = opts[:initial_state]
-      self.state_column  = opts[:state_column] || 'status'
-      self.states        = HashWithIndifferentAccess.new
-      self.events        = HashWithIndifferentAccess.new
+    class MosEvent
+      def initialize(name, column, opts)
+        @name, @column, @opts = name, column, opts
+      end
 
-      add_state(self.initial_state)
-      before_create :set_initial_state
-      after_create :run_initial_state_actions
+      attr_reader :name, :column, :opts
+    end
+
+    # create a hash for states
+    def prepare_mos_attributes
+      unless self.respond_to?(:states)
+        class_attribute :states
+        class_attribute :events
+
+        self.states = HashWithIndifferentAccess.new
+        self.events = HashWithIndifferentAccess.new
+
+        before_create :set_initial_states
+        after_create  :run_initial_state_actions
+      end
+    end
+
+    def get_initial_state_for(column)
+      self.states.each do |name, state|
+        return state if column == state.column && state.initial?
+      end
+      nil
+    end
+
+    def ministry_of_state(column)
+      prepare_mos_attributes
+      @mos_current_column_ = column
+      yield
+
+      initial_state = get_initial_state_for(column)
+      raise NoInitialState.new("You need to specify initial state") unless initial_state
+    end
+
+    def add_initial_state(state)
+      add_state(state, :initial => true)
     end
 
     def add_state(name, options={})
-      self.states.merge!(name => options)
+      state = MosState.new(name, @mos_current_column_, options)
+      self.states.merge!(name => state)
       class_eval <<-RUBY,__FILE__,__LINE__+1
         def #{name}?; check_state('#{name}'); end
       RUBY
@@ -36,7 +71,8 @@ module MinistryOfState
 
     def add_event(name, &block)
       opts = class_eval(&block)
-      self.events.merge!(name => opts)
+      event = MosEvent.new(name, @mos_current_column_, opts)
+      self.events.merge!(name => event)
       class_eval <<-RUBY,__FILE__,__LINE__+1
         def #{name.to_s}!
           fire('#{name}')
@@ -54,55 +90,67 @@ module MinistryOfState
   end
 
   module InstanceMethods
-    
-    def set_initial_state
-      begin
-        enter   = states[initial_state][:enter]
-        invoke_callback(enter) if enter
-        true
-      rescue StandardError => e
-        errors.add(:base, e.to_s)
-        false
+
+    def set_initial_states
+      states.each do |name, state|
+        next unless state.initial?
+
+        begin
+          enter = state.opts[:enter]
+          invoke_callback(enter) if enter
+          true
+        rescue StandardError => e
+          errors.add(:base, e.to_s)
+          false
+        end
+        write_attribute(state_machine_column(state.column), state.name)
       end
-      write_attribute state_machine_column, initial_state
     end
 
     def run_initial_state_actions
-      begin
-        after = states[initial_state][:after]
-        invoke_callback(after) if after
-        true
-      rescue StandardError => e
-        errors.add(:base, e.to_s)
-        false
+      states.each do |name, state|
+        next unless state.initial?
+
+        begin
+          after = state.opts[:after]
+          invoke_callback(enter) if after
+          true
+        rescue StandardError => e
+          errors.add(:base, e.to_s)
+          false
+        end
       end
     end
 
-    def current_state
-      send("#{state_machine_column}_was").to_sym
+    def current_state(column)
+      send("#{column}_was").to_sym
     end
 
     def check_state(state)
-      send("#{state_machine_column}_was") == state.to_s
+      column = states[state].column
+      send("#{column}_was") == state.to_s
     end
 
     def fire(event)
-      options     = events[event]
-      to_state    = options[:to]
+      options   = events[event].opts
+      to_state  = options[:to]
+      column    = events[event].column
+
       raise TransitionNotAllowed.new("Invalid 'to' state '#{to_state}'") unless states[to_state]
       check_guard = options[:guard] ? invoke_callback(options[:guard]) : true
       return unless check_guard
+
       begin
         transaction do
-          enter = states[to_state][:enter]
-          after = states[to_state][:after]
-          exit  = states[to_state][:exit]
+          enter = states[to_state].opts[:enter]
+          after = states[to_state].opts[:after]
+          exit  = states[to_state].opts[:exit]
 
           invoke_callback(enter) if enter
           self.lock!
-          t_current_state = send(state_machine_column).try(:to_sym)
+          t_current_state = send( state_machine_column(column) ).try(:to_sym)
           check_transitions?(t_current_state, options)
-          write_attribute(state_machine_column,to_state.to_s)
+          write_attribute( state_machine_column(column), to_state.to_s )
           save
           invoke_callback(exit) if exit
           invoke_callback(after) if after
@@ -110,18 +158,19 @@ module MinistryOfState
         self.errors.empty?
       rescue StandardError => e
         errors.add(:base, e.to_s)
+        p errors
         false
       end
     end
 
-    def state_machine_column
-      if(self.class.column_names.include?(state_column))
-        state_column
+    def state_machine_column(column)
+      if(self.class.column_names.include?(column))
+        column
       else
-        raise InvalidStateColumn.new("State column '#{state_column}' does not exist in table '#{self.class.table_name}'")
+        raise InvalidStateColumn.new("State column '#{column}' does not exist in table '#{self.class.table_name}'")
       end
     end
-    
+
     def check_transitions?(t_current_state, opts)
       unless opts[:from].include?(t_current_state)
         raise InvalidState.new("Invalid from state '#{t_current_state}' for target state '#{opts[:to]}'")

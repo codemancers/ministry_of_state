@@ -2,13 +2,17 @@ class Blog < ActiveRecord::Base
   include MinistryOfState
   validates_presence_of :text
 
-   ministry_of_state(:initial_state => 'pending', :state_column => 'status' )
-   attr_accessor :foo
-   add_state :approved, :enter => :test_method
+  attr_accessor :foo
 
-   add_event :approve do
-     transitions :from => 'pending', :to => 'approved'
-   end
+  ministry_of_state('status') do
+    add_initial_state 'pending'
+
+    add_state :approved, :enter => :test_method
+
+    add_event :approve do
+      transitions :from => 'pending', :to => 'approved'
+    end
+  end
 
   def test_method
     @foo = true

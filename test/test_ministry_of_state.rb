@@ -4,6 +4,7 @@ require File.dirname(__FILE__) + '/user'
 require File.dirname(__FILE__) + '/article'
 require File.dirname(__FILE__) + '/student'
 require File.dirname(__FILE__) + '/post'
+require File.dirname(__FILE__) + '/cargo'
 
 ActiveRecord::Base.configurations = {
   'db1' => {
@@ -24,7 +25,7 @@ class TestMinistryOfState < ActiveSupport::TestCase
       t.column :status, :string
       t.timestamps
     end
-    
+
     User.connection.drop_table('users') if User.connection.table_exists?(:users)
     User.connection.create_table :users do |u|
       u.string :status
@@ -49,6 +50,12 @@ class TestMinistryOfState < ActiveSupport::TestCase
       p.string :title
       p.text :content
       p.timestamps
+    end
+
+    Cargo.connection.drop_table('cargos') if Cargo.connection.table_exists?(:cargos)
+    Cargo.connection.create_table :cargos do |c|
+      c.string :payment
+      c.string :shippment
     end
   end
 
@@ -116,10 +123,12 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert_raise(MinistryOfState::TransitionNotAllowed) do
         class Foo < ActiveRecord::Base
           include MinistryOfState
-          ministry_of_state(:state_column => 'status',:initial_state => :pending)
-          add_state :active
-          add_event(:activate) do
-            transitions(:to => :active)
+          ministry_of_state('status') do
+            add_initial_state :pending
+            add_state :active
+            add_event(:activate) do
+              transitions(:to => :active)
+            end
           end
         end
       end
@@ -131,7 +140,8 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert_raise(MinistryOfState::NoInitialState) do
         class Note < ActiveRecord::Base
           include MinistryOfState
-          ministry_of_state(:state_column => 'status' )
+          ministry_of_state('status') do
+          end
         end
       end
     end
@@ -147,7 +157,7 @@ class TestMinistryOfState < ActiveSupport::TestCase
 
       assert @post.publish!
       assert @post.published?
-      assert_equal :published, @post.current_state
+      assert_equal :published, @post.current_state('status')
       assert @post.public
 
       assert_nil @post.private
@@ -184,5 +194,23 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @student.active?
     end
 
+  end
+
+  context "for cargo with multiple stages" do
+    setup do
+      @cargo = Cargo.create
+    end
+
+    should "able to be delivered to destination" do
+      assert @cargo.unpaid?
+      assert @cargo.pay!
+      assert @cargo.paid?
+
+      assert @cargo.unshipped?
+      assert @cargo.bill_paid!
+      assert @cargo.shipped?
+      assert @cargo.cargo_delivered!
+      assert @cargo.delivered?
+    end
   end
 end
