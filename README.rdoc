@@ -12,17 +12,19 @@ Because State machines are simple, they do not have to be greater than 2000 line
 
     class User < ActiveRecord::Base
       include MinistryOfState
-      ministry_of_state(:initial_state => 'pending', :state_column => 'status' )
-      add_state :active
-      add_state :pending_payment
+      ministry_of_state('status') do
+        add_initial_state 'pending'
+        add_state :active
+        add_state :pending_payment
 
-      add_event(:activate) do
-        transitions(:from => :pending, :to => :active)
+        add_event(:activate) do
+          transitions(:from => :pending, :to => :active)
+        end
       end
     end
 
 == Contributing to ministry_of_state
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 * Fork the project
@@ -35,5 +37,3 @@ Because State machines are simple, they do not have to be greater than 2000 line
 
 Copyright (c) 2011 Hemant, Neeraj and Vishnu. See LICENSE.txt for
 further details.
-
-
