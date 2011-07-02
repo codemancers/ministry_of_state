@@ -57,22 +57,22 @@ module MinistryOfState
       raise NoInitialState.new("You need to specify initial state") unless initial_state
     end
 
-    def add_initial_state(state)
-      add_state(state, :initial => true)
+    def add_initial_state(name)
+      add_state(name, :initial => true)
     end
 
     def add_state(name, options={})
-      state = MosState.new(name, @mos_current_column_, options)
-      self.states.merge!(name => state)
+      state = MosState.new(name.to_s, @mos_current_column_, options)
+      self.states.merge!(name.to_s => state)
       class_eval <<-RUBY,__FILE__,__LINE__+1
-        def #{name}?; check_state('#{name}'); end
+        def #{name.to_s}?; check_state('#{name}'); end
       RUBY
     end
 
     def add_event(name, &block)
       opts = class_eval(&block)
-      event = MosEvent.new(name, @mos_current_column_, opts)
-      self.events.merge!(name => event)
+      event = MosEvent.new(name.to_s, @mos_current_column_, opts)
+      self.events.merge!(name.to_s => event)
       class_eval <<-RUBY,__FILE__,__LINE__+1
         def #{name.to_s}!
           fire('#{name}')
