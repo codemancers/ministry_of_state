@@ -213,4 +213,13 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @cargo.delivered?
     end
   end
+
+  context "honour default states set by user" do
+    should "able to honour default state" do
+      @cargo = Cargo.new
+      @cargo.payment = 'paid'
+      @cargo.save
+      assert @cargo.paid?
+    end
+  end
 end

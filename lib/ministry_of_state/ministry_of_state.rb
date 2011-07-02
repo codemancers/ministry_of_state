@@ -103,7 +103,8 @@ module MinistryOfState
           errors.add(:base, e.to_s)
           false
         end
-        write_attribute(state_machine_column(state.column), state.name)
+        default_state = read_attribute( state_machine_column(state.column) )
+        write_attribute(state_machine_column(state.column), state.name) unless default_state
       end
     end
 
