@@ -6,26 +6,27 @@ module MinistryOfState
   class TransitionNotAllowed < Exception; end
   class InvalidStateColumn < Exception; end
 
+  class MosState
+    def initialize(name, column, opts)
+      @name, @column, @opts = name, column, opts
+    end
+
+    attr_reader :name, :column, :opts
+
+    def initial?
+      opts[:initial]
+    end
+  end
+
+  class MosEvent
+    def initialize(name, column, opts)
+      @name, @column, @opts = name, column, opts
+    end
+
+    attr_reader :name, :column, :opts
+  end
+
   module ClassMethods
-    class MosState
-      def initialize(name, column, opts)
-        @name, @column, @opts = name, column, opts
-      end
-
-      attr_reader :name, :column, :opts
-
-      def initial?
-        opts[:initial]
-      end
-    end
-
-    class MosEvent
-      def initialize(name, column, opts)
-        @name, @column, @opts = name, column, opts
-      end
-
-      attr_reader :name, :column, :opts
-    end
 
     # create a hash for states
     def prepare_mos_attributes
