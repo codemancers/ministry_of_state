@@ -1,10 +1,10 @@
 module MinistryOfState
   extend ActiveSupport::Concern
 
-  class InvalidState < Exception; end
-  class NoInitialState < Exception; end
-  class TransitionNotAllowed < Exception; end
-  class InvalidStateColumn < Exception; end
+  class InvalidState < StandardError; end
+  class NoInitialState < StandardError; end
+  class TransitionNotAllowed < StandardError; end
+  class InvalidStateColumn < StandardError; end
 
   class MosState
     def initialize(name, column, opts)
