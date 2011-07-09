@@ -141,26 +141,25 @@ module MinistryOfState
       raise TransitionNotAllowed.new("Invalid 'to' state '#{to_state}'") unless states[to_state]
       check_guard = options[:guard] ? invoke_callback(options[:guard]) : true
       return unless check_guard
+      enter = states[to_state].opts[:enter]
+      after = states[to_state].opts[:after]
+      exit  = states[to_state].opts[:exit]
+      invoke_callback(enter) if enter
 
       begin
         transaction do
-          enter = states[to_state].opts[:enter]
-          after = states[to_state].opts[:after]
-          exit  = states[to_state].opts[:exit]
-
-          invoke_callback(enter) if enter
           self.lock!
           t_current_state = send( state_machine_column(column) ).try(:to_sym)
           check_transitions?(t_current_state, options)
           write_attribute( state_machine_column(column), to_state.to_s )
           save
-          invoke_callback(exit) if exit
-          invoke_callback(after) if after
         end
+
+        invoke_callback(exit) if exit
+        invoke_callback(after) if after
         self.errors.empty?
       rescue StandardError => e
         errors.add(:base, e.to_s)
-        p errors
         false
       end
     end
