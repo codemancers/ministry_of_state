@@ -9,20 +9,6 @@ rescue Bundler::BundlerError => e
 end
 require 'rake'
 
-require 'jeweler'
-Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "ministry_of_state"
-  gem.homepage = "http://github.com/gnufied/ministry_of_state"
-  gem.license = "MIT"
-  gem.summary = %Q{Handling state machines}
-  gem.description = %Q{A ActiveRecord plugin for working with state machines}
-  gem.email = "hkumar@crri.co.in"
-  gem.authors = ["Hemant Kumar"]
-end
-
-Jeweler::RubygemsDotOrgTasks.new
-
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test' << "./"
