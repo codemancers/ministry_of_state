@@ -17,6 +17,7 @@ doc
 pkg
 
 ministry_of_state_test
+Gemfile.lock
 
 # Have editor/IDE/OS specific files you need to ignore? Consider using a global gitignore: 
 #
