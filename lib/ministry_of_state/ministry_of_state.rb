@@ -70,7 +70,7 @@ module MinistryOfState
       RUBY
     end
 
-    def add_event(name, &block)
+    def add_event(name, options = {},&block)
       opts = class_eval(&block)
       event = MosEvent.new(name.to_s, @mos_current_column_, opts)
       self.events.merge!(name.to_s => event)
