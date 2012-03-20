@@ -71,8 +71,9 @@ module MinistryOfState
     end
 
     def add_event(name, options = {},&block)
-      opts = class_eval(&block)
-      event = MosEvent.new(name.to_s, @mos_current_column_, opts)
+      opts = yield
+      event_options = opts.merge(options)
+      event = MosEvent.new(name.to_s, @mos_current_column_, event_options)
       self.events.merge!(name.to_s => event)
       class_eval <<-RUBY,__FILE__,__LINE__+1
         def #{name.to_s}!
@@ -139,9 +140,15 @@ module MinistryOfState
     raise TransitionNotAllowed.new("Invalid 'to' state '#{to_state}'") unless states[to_state]
     check_guard = options[:guard] ? invoke_callback(options[:guard]) : true
     return unless check_guard
+
+    before_event_callback = options[:before]
+    after_event_callback = options[:after]
+
     enter = states[to_state].opts[:enter]
     after = states[to_state].opts[:after]
     exit  = states[to_state].opts[:exit]
+
+    invoke_callback(before_event_callback) if before_event_callback
     invoke_callback(enter) if enter
 
     begin
@@ -155,6 +162,8 @@ module MinistryOfState
 
       invoke_callback(exit) if exit
       invoke_callback(after) if after
+      invoke_callback(after_event_callback) if after_event_callback
+
       self.errors.empty?
     rescue StandardError => e
       errors.add(:base, e.to_s)
