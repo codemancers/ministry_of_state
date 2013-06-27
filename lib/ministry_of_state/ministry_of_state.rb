@@ -145,6 +145,7 @@ module MinistryOfState
     after_event_callback = options[:after]
 
     enter = states[to_state].opts[:enter]
+    during = states[to_state].opts[:during]
     after = states[to_state].opts[:after]
     exit  = states[to_state].opts[:exit]
 
@@ -157,6 +158,7 @@ module MinistryOfState
         t_current_state = send( state_machine_column(column) ).try(:to_sym)
         check_transitions?(t_current_state, options)
         write_attribute( state_machine_column(column), to_state.to_s )
+        invoke_callback(during) if during
         # so that transaction is rolled-back on error
         save!
       end
