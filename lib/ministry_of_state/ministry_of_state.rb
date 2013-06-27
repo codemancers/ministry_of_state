@@ -157,7 +157,8 @@ module MinistryOfState
         t_current_state = send( state_machine_column(column) ).try(:to_sym)
         check_transitions?(t_current_state, options)
         write_attribute( state_machine_column(column), to_state.to_s )
-        save
+        # so that transaction is rolled-back on error
+        save!
       end
 
       invoke_callback(exit) if exit
