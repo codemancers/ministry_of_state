@@ -1,0 +1,18 @@
+class BlogWithCallback < ActiveRecord::Base
+  self.table_name = 'blogs'
+  
+  include MinistryOfState
+  ministry_of_state('status') do
+    add_initial_state :pending
+    add_state :active, during: ->(x) {
+      x.during_callback
+    }
+    add_event(:activate) do
+      transitions(from: :pending, :to => :active)
+    end
+  end
+  
+  def during_callback
+    raise "an expection to test if it is inside transaction"
+  end
+end

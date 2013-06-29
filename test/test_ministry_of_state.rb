@@ -1,5 +1,8 @@
+require 'debugger'
+
 require File.dirname(__FILE__) + '/helper'
 require File.dirname(__FILE__) + '/blog'
+require File.dirname(__FILE__) + '/blog_with_callback'
 require File.dirname(__FILE__) + '/user'
 require File.dirname(__FILE__) + '/article'
 require File.dirname(__FILE__) + '/student'
@@ -227,4 +230,20 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @cargo.paid?
     end
   end
+
+  context "during callback hook" do
+    should "be executed" do
+      foo = BlogWithCallback.new
+      foo.expects(:during_callback).once
+      foo.activate!
+    end
+    
+    should "rollback on error because it is wrapped in a transaction" do
+      foo = BlogWithCallback.new(text: "testing during callback")
+      foo.save!
+      foo.activate!
+      foo.reload
+      assert foo.pending?
+    end
+  end # context "during callback hook"
 end
