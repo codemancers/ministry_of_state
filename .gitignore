@@ -1,49 +1,52 @@
-.idea/
-.rvmrc
-# rcov generated
-coverage
+*.gem
+*.rbc
+.bundle
+.config
+InstalledFiles
+lib/bundler/man
+test/tmp
+test/version_tmp
+tmp
 
-# rdoc generated
-rdoc
+pkg # jeweler generated
 
 # yard generated
-doc
+doc/
 .yardoc
+_yardoc
 
-# bundler
-.bundle
+spec/reports
+coverage # rcov generated
+rdoc # rdoc generated
 
-# jeweler generated
-pkg
+# sqlite3 database
+*.sqlite3
+*.sqlite
 
-ministry_of_state_test
 Gemfile.lock
 
-# Have editor/IDE/OS specific files you need to ignore? Consider using a global gitignore: 
-#
-# * Create a file at ~/.gitignore
-# * Include files you want ignored
-# * Run: git config --global core.excludesfile ~/.gitignore
-#
-# After doing this, these files will be ignored in all your git projects,
-# saving you from having to 'pollute' every project you touch with them
-#
-# Not sure what to needs to be ignored for particular editors/OSes? Here's some ideas to get you started. (Remember, remove the leading # of the line)
-#
+.rvmrc
+.ruby-version
+.ruby-gemset
+.powrc
+
 # For MacOS:
-#
-#.DS_Store
-#
+.DS_Store
+
 # For TextMate
-#*.tmproj
-#tmtags
-#
+*.tmproj
+tmtags
+
 # For emacs:
-#*~
-#\#*
-#.\#*
-#
+*~
+\#*
+.\#*
+
 # For vim:
-#*.swp
+*.swp
+
+# for rubymine IDE
+.idea/
+
 vendor
 

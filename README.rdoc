@@ -23,6 +23,20 @@ Because State machines are simple, they do not have to be greater than 2000 line
       end
     end
 
+= Installation
+
+Add this line to your application's Gemfile:
+
+    gem 'ministry_of_state'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem ministry_of_state
+
 == Contributing to ministry_of_state
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
