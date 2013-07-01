@@ -7,6 +7,9 @@ rescue Bundler::BundlerError => e
   $stderr.puts "Run `bundle install` to install missing gems"
   exit e.status_code
 end
+
+require "bundler/gem_tasks"
+
 require 'rake'
 
 require 'rake/testtask'
@@ -15,7 +18,6 @@ Rake::TestTask.new(:test) do |test|
   test.pattern = 'test/**/test_*.rb'
   test.verbose = true
 end
-
 
 task :default => :test
 

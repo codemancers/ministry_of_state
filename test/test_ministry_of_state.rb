@@ -10,7 +10,7 @@ ActiveRecord::Base.configurations = {
   'db1' => {
     :adapter  => 'sqlite3',
     :encoding => 'utf8',
-    :database => 'ministry_of_state_test',
+    :database => ':memory:',
   }
 }
 
