@@ -2,7 +2,7 @@
 
 Because State machines are simple, they do not have to be greater than 2000 lines of code (and complexity).
 
-{https://travis-ci.org/code-mancers/ministry_of_state.png}[https://travis-ci.org/code-mancers/ministry_of_state]
+{<img src="https://travis-ci.org/code-mancers/ministry_of_state.png" />}[https://travis-ci.org/code-mancers/ministry_of_state]
 
 = Features
 * Events are wrapped in a transaction and record is locked before going for a state change.
