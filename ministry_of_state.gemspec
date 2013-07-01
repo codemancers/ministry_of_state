@@ -30,5 +30,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sqlite3", "~> 1.3.7"
   spec.add_development_dependency "shoulda", "~> 3.5.0"
   spec.add_development_dependency "mocha", "~> 0.14.0"
-  spec.add_development_dependency "debugger", "~> 1.6.0"
 end
