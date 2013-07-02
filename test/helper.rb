@@ -1,6 +1,9 @@
 require 'rubygems'
 require 'bundler'
+
+require 'etc'
 require 'debugger'
+
 begin
   Bundler.setup(:default, :development)
 rescue Bundler::BundlerError => e
@@ -16,27 +19,39 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'ministry_of_state'
 
 ActiveRecord::Base.configurations = {
-  'db1' => {
+  'sqlite' => {
     :adapter  => 'sqlite3',
     :encoding => 'utf8',
     :database => ':memory:',
+  },
+  'postgres' => {
+    adapter: 'postgresql',
+    encoding: 'unicode',
+    database: 'mos_development',
+    pool: '5',
+    username: Etc.getpwuid(Process.uid).name,
+    password: '',
+    min_messages: 'warning'
   }
 }
 
-ActiveRecord::Base.establish_connection('db1')
+# ActiveRecord::Base.establish_connection('sqlite')
 
-def migrate_blog!
-  Blog.connection.drop_table('blogs') if Blog.connection.table_exists?(:blogs)
-  Blog.connection.create_table :blogs do |t|
+conn = ActiveRecord::Base.configurations['postgres']
+ActiveRecord::Base.establish_connection conn.merge(database: "postgres")
+ActiveRecord::Base.connection.recreate_database conn[:database]
+ActiveRecord::Base.establish_connection('postgres')
+
+def migrate_blog!(klass = Blog)
+  klass.connection.create_table :blogs, force: true do |t|
     t.column :text, :text
     t.column :status, :string
     t.timestamps
   end
 end
 
-def migrate_user!
-  User.connection.drop_table('users') if User.connection.table_exists?(:users)
-  User.connection.create_table :users do |u|
+def migrate_user!(klass = User)
+  klass.connection.create_table :users, force: true do |u|
     u.string :status
     u.string :firstname
     u.string :lastname
@@ -47,18 +62,16 @@ def migrate_user!
   end
 end
 
-def migrate_article!
-  Article.connection.drop_table('articles') if Article.connection.table_exists?(:articles)
-  Article.connection.create_table :articles do |a|
+def migrate_article!(klass = Article)
+  klass.connection.create_table :articles, force: :true do |a|
     a.string :state
     a.string :title
     a.text :content
-  end
+    end
 end
 
-def migrate_post!
-  Post.connection.drop_table('posts') if Post.connection.table_exists?(:posts)
-  Post.connection.create_table :posts do |p|
+def migrate_post!(klass = Post)
+  klass.connection.create_table :posts, force: true do |p|
     p.string :status
     p.string :title
     p.text :content
@@ -67,9 +80,8 @@ def migrate_post!
   end
 end
 
-def migrate_cargo!
-  Cargo.connection.drop_table('cargos') if Cargo.connection.table_exists?(:cargos)
-  Cargo.connection.create_table :cargos do |c|
+def migrate_cargo!(klass = Cargo)
+  klass.connection.create_table :cargos, force: true do |c|
     c.string :payment
     c.string :shippment
   end

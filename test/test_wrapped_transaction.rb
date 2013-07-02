@@ -28,14 +28,20 @@ end
 class TestWrappedTransaction < ActiveSupport::TestCase
 
   setup do
-    migrate_post!
-    @post = MinimalPost.create(:title => "Hello world", content: "test test")
+    migrate_post! MinimalPost
+    @post = MinimalPost.create(:title => "Hello world", content: "test test", status: :pending)
   end
 
   context "after callback hook" do
     should "be executed" do
       @post.expects(:make_public).once
       @post.publish_and_make_public!
+    end
+
+    should "rollback on error because it is wrapped in a transaction" do
+      @post.publish_and_make_public!
+      @post.reload
+      assert @post.pending?
     end
   end
 end
