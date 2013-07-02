@@ -3,6 +3,7 @@ require 'debugger'
 require File.dirname(__FILE__) + '/helper'
 require File.dirname(__FILE__) + '/blog'
 require File.dirname(__FILE__) + '/blog_with_callback'
+require File.dirname(__FILE__) + '/blog_with_exit_callback'
 require File.dirname(__FILE__) + '/user'
 require File.dirname(__FILE__) + '/article'
 require File.dirname(__FILE__) + '/student'
@@ -164,6 +165,8 @@ class TestMinistryOfState < ActiveSupport::TestCase
     end
   end
 
+  # TODO: exit callback is now on the from_event not the to_event.
+  # check after callback on the to_event
   context "calling enter and exit callbacks for normal events" do
     setup do
       @post = Post.create(:title => "Hello", :content => "Good world")
@@ -258,6 +261,14 @@ class TestMinistryOfState < ActiveSupport::TestCase
       foo.activate!
       foo.reload
       assert foo.pending?
+    end
+  end # context "during callback hook"
+
+  context "from event exit callback hook" do
+    should "be executed" do
+      foo = BlogWithExitCallback.new(status: :pending)
+      foo.expects(:exit_pending).once
+      foo.activate!
     end
   end # context "during callback hook"
 end

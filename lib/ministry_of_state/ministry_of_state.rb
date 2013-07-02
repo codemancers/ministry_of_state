@@ -58,8 +58,8 @@ module MinistryOfState
       raise NoInitialState.new("You need to specify initial state") unless initial_state
     end
 
-    def add_initial_state(name)
-      add_state(name, :initial => true)
+    def add_initial_state(name, options={})
+      add_state(name, options.merge(:initial => true))
     end
 
     def add_state(name, options={})
@@ -147,8 +147,8 @@ module MinistryOfState
     enter = states[to_state].opts[:enter]
     during = states[to_state].opts[:during]
     after = states[to_state].opts[:after]
-    exit  = states[to_state].opts[:exit]
-
+    exit  = nil
+    
     invoke_callback(before_event_callback) if before_event_callback
     invoke_callback(enter) if enter
 
@@ -158,6 +158,8 @@ module MinistryOfState
         t_current_state = send( state_machine_column(column) ).try(:to_sym)
         check_transitions?(t_current_state, options)
         write_attribute( state_machine_column(column), to_state.to_s )
+
+        exit = states[t_current_state].opts[:exit]
         invoke_callback(during) if during
         # so that transaction is rolled-back on error
         save!
