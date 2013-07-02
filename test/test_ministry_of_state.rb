@@ -113,6 +113,20 @@ class TestMinistryOfState < ActiveSupport::TestCase
     end
   end
 
+  context "initial state incorrect" do
+    should "will return false" do
+      foo = BlogWithCallback.new(status: "active")
+      assert !foo.activate!
+    end
+
+    should "will have errors" do
+      foo = BlogWithCallback.new(status: "active")
+      foo.activate!
+      # transition is from 'pending' to 'active'
+      assert_equal foo.errors[:base], ["Invalid from state 'active' for target state 'active'"]
+    end
+  end
+
   context "For non-existant state columns" do
     should "throw error if state column is invalid" do
       assert_raise(MinistryOfState::InvalidStateColumn) do
@@ -230,16 +244,16 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @cargo.paid?
     end
   end
-
+  
   context "during callback hook" do
     should "be executed" do
-      foo = BlogWithCallback.new
+      foo = BlogWithCallback.new(status: :pending)
       foo.expects(:during_callback).once
       foo.activate!
     end
     
     should "rollback on error because it is wrapped in a transaction" do
-      foo = BlogWithCallback.new(text: "testing during callback")
+      foo = BlogWithCallback.new(status: :pending, text: "testing during callback")
       foo.save!
       foo.activate!
       foo.reload

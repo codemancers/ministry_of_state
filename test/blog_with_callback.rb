@@ -4,9 +4,8 @@ class BlogWithCallback < ActiveRecord::Base
   include MinistryOfState
   ministry_of_state('status') do
     add_initial_state :pending
-    add_state :active, during: ->(x) {
-      x.during_callback
-    }
+    add_state :active, during: :during_callback
+
     add_event(:activate) do
       transitions(from: :pending, :to => :active)
     end
