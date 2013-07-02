@@ -251,12 +251,32 @@ class TestMinistryOfState < ActiveSupport::TestCase
   context "during callback hook" do
     should "be executed" do
       foo = BlogWithCallback.new(status: :pending)
+      foo.stubs(:on_transition).returns(true)
       foo.expects(:during_callback).once
       foo.activate!
     end
     
     should "rollback on error because it is wrapped in a transaction" do
       foo = BlogWithCallback.new(status: :pending, text: "testing during callback")
+      foo.stubs(:on_transition).returns(true)
+      foo.save!
+      foo.activate!
+      foo.reload
+      assert foo.pending?
+    end
+  end # context "during callback hook"
+
+  context "on_transition callback hook" do
+    should "be executed" do
+      foo = BlogWithCallback.new(status: :pending)
+      foo.stubs(:during_callback).returns(true)
+      foo.expects(:on_transition).once
+      foo.activate!
+    end
+    
+    should "rollback on error because it is wrapped in a transaction" do
+      foo = BlogWithCallback.new(status: :pending, text: "testing during callback")
+      foo.stubs(:during_callback).returns(true)
       foo.save!
       foo.activate!
       foo.reload
