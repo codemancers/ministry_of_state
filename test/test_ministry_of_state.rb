@@ -1,5 +1,3 @@
-require 'debugger'
-
 require File.dirname(__FILE__) + '/helper'
 require File.dirname(__FILE__) + '/blog'
 require File.dirname(__FILE__) + '/blog_with_callback'
@@ -10,57 +8,14 @@ require File.dirname(__FILE__) + '/student'
 require File.dirname(__FILE__) + '/post'
 require File.dirname(__FILE__) + '/cargo'
 
-ActiveRecord::Base.configurations = {
-  'db1' => {
-    :adapter  => 'sqlite3',
-    :encoding => 'utf8',
-    :database => ':memory:',
-  }
-}
-
-ActiveRecord::Base.establish_connection('db1')
-
 class TestMinistryOfState < ActiveSupport::TestCase
 
   setup do
-    Blog.connection.drop_table('blogs') if Blog.connection.table_exists?(:blogs)
-    Blog.connection.create_table :blogs do |t|
-      t.column :text, :text
-      t.column :status, :string
-      t.timestamps
-    end
-
-    User.connection.drop_table('users') if User.connection.table_exists?(:users)
-    User.connection.create_table :users do |u|
-      u.string :status
-      u.string :firstname
-      u.string :lastname
-      u.string :gender
-      u.datetime :login_at
-      u.string :login
-      u.string :type
-    end
-
-    Article.connection.drop_table('articles') if Article.connection.table_exists?(:articles)
-    Article.connection.create_table :articles do |a|
-      a.string :state
-      a.string :title
-      a.text :content
-    end
-
-    Post.connection.drop_table('posts') if Post.connection.table_exists?(:posts)
-    Post.connection.create_table :posts do |p|
-      p.string :status
-      p.string :title
-      p.text :content
-      p.timestamps
-    end
-
-    Cargo.connection.drop_table('cargos') if Cargo.connection.table_exists?(:cargos)
-    Cargo.connection.create_table :cargos do |c|
-      c.string :payment
-      c.string :shippment
-    end
+    migrate_blog!
+    migrate_user!
+    migrate_article!
+    migrate_post!
+    migrate_cargo!
   end
 
   context "User should be able to define state" do
@@ -176,7 +131,7 @@ class TestMinistryOfState < ActiveSupport::TestCase
 
       assert_nil @post.public
       assert_nil @post.published_flag
-
+      
       assert @post.publish!
       assert @post.published?
       assert_equal :published, @post.current_state('status')
