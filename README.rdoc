@@ -8,8 +8,8 @@ Because State machines are simple, they do not have to be greater than 2000 line
 = Features
 * Supports rails4 now. No changes required.
 * Events are wrapped in a transaction and record is locked before going for a state change.
-* Ignores dirty attributes (still on the fence with this one)
-* Events and states can be inhereted across classes.
+* Ignores dirty attributes while going for state change. This means unlike AASM you can't use an event transition as shorthand of `save`.
+* Events and states can be inherited across classes.
 * Simple 136 lines of code, covered with close to > 98% test coverage.
 
 = Using it
