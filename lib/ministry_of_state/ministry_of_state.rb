@@ -83,6 +83,10 @@ module MinistryOfState
     end
 
     def transitions(opts = {})
+      if opts[:from] == :any
+        opts[:from] = self.states.keys
+      end
+
       if opts[:from].blank? || opts[:to].blank?
         raise TransitionNotAllowed.new("You need to specify from and to states")
       end

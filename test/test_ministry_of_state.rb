@@ -147,6 +147,26 @@ class TestMinistryOfState < ActiveSupport::TestCase
     end
   end
 
+  context "can specify from transition as any" do
+    should "cancel a pending blog" do
+      @pending_blog = Blog.create(status: 'pending', text: "some text")
+      assert @pending_blog.cancel!
+      assert @pending_blog.errors.blank?
+    end
+
+    should "cancel a approved blog" do
+      @approved_blog = Blog.create(status: 'approved', text: "some text")
+      assert @approved_blog.cancel!
+      assert @approved_blog.errors.blank?
+    end
+
+    should "cancel an already cancelled blog" do
+      @cancelled_blog = Blog.create(status: 'cancelled', text: "some text")
+      assert @cancelled_blog.cancel!
+      assert @cancelled_blog.errors.blank?
+    end
+  end
+
   context "calling enter and exit callbacks for normal events" do
     setup do
       @post = Post.create(:title => "Hello", :content => "Good world")
