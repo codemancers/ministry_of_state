@@ -7,7 +7,9 @@ rescue Bundler::BundlerError => e
   $stderr.puts "Run `bundle install` to install missing gems"
   exit e.status_code
 end
-require 'test/unit'
+
+require 'minitest/autorun'
+require 'minitest/unit'
 require 'shoulda'
 
 # TODO: Fix this one when shoulda-context patches MiniTest::Unit::TestCase
