@@ -265,4 +265,17 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @cargo.reload.paid?
     end
   end
+
+  context 'fetching records from database' do
+    setup do
+      @cargo = Cargo.create(payment: 'paid')
+    end
+
+    should 'not fire set initial state callback' do
+      Cargo.any_instance.expects(:set_initial_state).times(0)
+
+      fetch_cargo_from_db = Cargo.find(@cargo.id)
+      assert fetch_cargo_from_db.paid?
+    end
+  end
 end
