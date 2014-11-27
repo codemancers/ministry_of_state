@@ -247,4 +247,17 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @cargo.paid?
     end
   end
+
+  context 'status helpers without persisting objects' do
+    should 'be able to read value from mos column' do
+      @cargo = Cargo.new
+      assert @cargo.unpaid?
+    end
+
+    should 'be able to read updated value from mos column' do
+      @cargo = Cargo.new
+      @cargo.payment = 'paid'
+      assert @cargo.paid?
+    end
+  end
 end
