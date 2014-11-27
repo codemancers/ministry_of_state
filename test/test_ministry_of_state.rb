@@ -259,5 +259,10 @@ class TestMinistryOfState < ActiveSupport::TestCase
       @cargo.payment = 'paid'
       assert @cargo.paid?
     end
+
+    should 'be able to persist with a different state' do
+      @cargo = Cargo.create(payment: 'paid')
+      assert @cargo.reload.paid?
+    end
   end
 end

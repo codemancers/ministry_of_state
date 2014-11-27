@@ -37,8 +37,7 @@ module MinistryOfState
         self.states = HashWithIndifferentAccess.new
         self.events = HashWithIndifferentAccess.new
 
-        after_initialize :set_initial_states
-        before_create :set_initial_states
+        after_initialize :set_initial_states_for_new_record
         after_create  :run_initial_state_actions
       end
     end
@@ -111,6 +110,11 @@ module MinistryOfState
       default_state = read_attribute( state_machine_column(state.column) )
       write_attribute(state_machine_column(state.column), state.name) unless default_state
     end
+  end
+
+
+  def set_initial_states_for_new_record
+    set_initial_states if new_record?
   end
 
   def run_initial_state_actions
