@@ -37,7 +37,7 @@ module MinistryOfState
         self.states = HashWithIndifferentAccess.new
         self.events = HashWithIndifferentAccess.new
 
-        before_create :set_initial_states
+        after_initialize :set_initial_states_for_new_record
         after_create  :run_initial_state_actions
       end
     end
@@ -112,6 +112,11 @@ module MinistryOfState
     end
   end
 
+
+  def set_initial_states_for_new_record
+    set_initial_states if new_record?
+  end
+
   def run_initial_state_actions
     states.each do |name, state|
       next unless state.initial?
@@ -133,7 +138,8 @@ module MinistryOfState
 
   def check_state(state)
     column = states[state].column
-    send("#{column}_was") == state.to_s
+    method = new_record? ? column : "#{column}_was"
+    send(method) == state.to_s
   end
 
   def fire(event)

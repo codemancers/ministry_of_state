@@ -247,4 +247,35 @@ class TestMinistryOfState < ActiveSupport::TestCase
       assert @cargo.paid?
     end
   end
+
+  context 'status helpers without persisting objects' do
+    should 'be able to read value from mos column' do
+      @cargo = Cargo.new
+      assert @cargo.unpaid?
+    end
+
+    should 'be able to read updated value from mos column' do
+      @cargo = Cargo.new
+      @cargo.payment = 'paid'
+      assert @cargo.paid?
+    end
+
+    should 'be able to persist with a different state' do
+      @cargo = Cargo.create(payment: 'paid')
+      assert @cargo.reload.paid?
+    end
+  end
+
+  context 'fetching records from database' do
+    setup do
+      @cargo = Cargo.create(payment: 'paid')
+    end
+
+    should 'not fire set initial state callback' do
+      Cargo.any_instance.expects(:set_initial_state).times(0)
+
+      fetch_cargo_from_db = Cargo.find(@cargo.id)
+      assert fetch_cargo_from_db.paid?
+    end
+  end
 end
